@@ -66,15 +66,9 @@ metadata:
     avi.knative.dev/release: devel
     avi.knative.dev/controller: "true"
 rules:
-  # AddressableService tracks services, so it needs to be able to list
-  # and watch those in whatever namespace folks create those CRDs in
-  # to do its job.
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get", "list", "watch"]
-
-  # SimpleDeployment creates and manages Pods, so it needs broad
-  # permissions on pods
-  - apiGroups: [""]
-    resources: ["pods"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingress"]
+    verbs: ["create", "get", "list", "update", "delete", "watch"]
+  - apiGroups: ["ako.vmware.com"]
+    resources: ["hostrule"]
     verbs: ["create", "get", "list", "update", "delete", "watch"]
