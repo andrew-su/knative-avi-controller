@@ -55,6 +55,10 @@ rules:
     verbs: ["get"]
     resourceNames: ["knative-avi-integration"]
 
+  - apiGroups: ["networking.internal.knative.dev"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -67,8 +71,8 @@ metadata:
     avi.knative.dev/controller: "true"
 rules:
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingress"]
+    resources: ["ingresses"]
     verbs: ["create", "get", "list", "update", "delete", "watch"]
   - apiGroups: ["ako.vmware.com"]
-    resources: ["hostrule"]
+    resources: ["hostrules"]
     verbs: ["create", "get", "list", "update", "delete", "watch"]
