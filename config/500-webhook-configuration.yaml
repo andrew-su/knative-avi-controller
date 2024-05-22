@@ -24,7 +24,7 @@ webhooks:
   clientConfig:
     service:
       name: webhook
-      namespace: knative-samples
+      namespace: knative-avi-integration
   failurePolicy: Fail
   sideEffects: None
   name: defaulting.webhook.knative-samples.knative.dev
@@ -41,7 +41,7 @@ webhooks:
   clientConfig:
     service:
       name: webhook
-      namespace: knative-samples
+      namespace: knative-avi-integration
   failurePolicy: Fail
   sideEffects: None
   name: validation.webhook.knative-samples.knative.dev
@@ -58,7 +58,7 @@ webhooks:
   clientConfig:
     service:
       name: webhook
-      namespace: knative-samples
+      namespace: knative-avi-integration
   failurePolicy: Fail
   sideEffects: None
   name: config.webhook.knative-samples.knative.dev
@@ -71,7 +71,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: webhook-certs
-  namespace: knative-samples
+  namespace: knative-avi-integration
   labels:
     samples.knative.dev/release: devel
 # The data is populated at install time.

@@ -16,13 +16,13 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: knative-samples-namespace-rbac
-  namespace: knative-samples
+  namespace: knative-avi-integration
   labels:
     samples.knative.dev/release: devel
 subjects:
   - kind: ServiceAccount
     name: controller
-    namespace: knative-samples
+    namespace: knative-avi-integration
 roleRef:
   kind: Role
   name: knative-samples-namespace-rbac
