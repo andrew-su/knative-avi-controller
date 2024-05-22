@@ -63,7 +63,7 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["get"]
-    resourceNames: ["knative-samples"]
+    resourceNames: ["knative-avi-integration"]
 
 ---
 kind: ClusterRole
