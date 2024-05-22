@@ -46,17 +46,7 @@ rules:
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["validatingwebhookconfigurations"]
     verbs: ["get", "update"]
-    resourceNames: ["config.webhook.knative-samples.knative.dev", "validation.webhook.knative-samples.knative.dev"]
-
-  # Allow the reconciliation of exactly our mutating webhooks.
-  # This is needed for us to patch in caBundle information.
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["mutatingwebhookconfigurations"]
-    verbs: ["list", "watch"]
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["mutatingwebhookconfigurations"]
-    verbs: ["get", "update"]
-    resourceNames: ["defaulting.webhook.knative-samples.knative.dev"]
+    resourceNames: ["config.webhook.knative-avi-integration.knative.dev", "validation.webhook.knative-avi-integration.knative.dev"]
 
   # The webhook configured the namespace as the OwnerRef on various cluster-scoped resources,
   # which requires we can Get the system namespace.
