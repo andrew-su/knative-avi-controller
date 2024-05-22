@@ -17,7 +17,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: defaulting.webhook.knative-samples.knative.dev
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
 webhooks:
 - admissionReviewVersions:
   - v1beta1
@@ -34,7 +34,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validation.webhook.knative-samples.knative.dev
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
 webhooks:
 - admissionReviewVersions:
   - v1beta1
@@ -73,5 +73,5 @@ metadata:
   name: webhook-certs
   namespace: knative-avi-integration
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
 # The data is populated at install time.

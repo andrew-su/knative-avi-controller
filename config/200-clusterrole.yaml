@@ -17,11 +17,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-samples-admin
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
-      samples.knative.dev/controller: "true"
+      avi.knative.dev/controller: "true"
 rules: [] # Rules are automatically filled in by the controller manager.
 
 ---
@@ -30,8 +30,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: knative-samples-core
   labels:
-    samples.knative.dev/release: devel
-    samples.knative.dev/controller: "true"
+    avi.knative.dev/release: devel
+    avi.knative.dev/controller: "true"
 rules:
   # Allow creating events associated with resources we are controlling.
   - apiGroups: [""]
@@ -88,8 +88,8 @@ metadata:
   # controller's contrived examples.
   name: knative-samples-resources
   labels:
-    samples.knative.dev/release: devel
-    samples.knative.dev/controller: "true"
+    avi.knative.dev/release: devel
+    avi.knative.dev/controller: "true"
 rules:
   # AddressableService tracks services, so it needs to be able to list
   # and watch those in whatever namespace folks create those CRDs in

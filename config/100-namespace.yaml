@@ -17,4 +17,4 @@ kind: Namespace
 metadata:
   name: knative-avi-integration
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
