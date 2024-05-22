@@ -17,5 +17,4 @@ kind: Namespace
 metadata:
   name: knative-avi-integration
   labels:
-    istio-injection: enabled
     samples.knative.dev/release: devel
