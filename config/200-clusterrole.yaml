@@ -15,7 +15,7 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: knative-samples-admin
+  name: knative-avi-admin
   labels:
     avi.knative.dev/release: devel
 aggregationRule:
@@ -28,7 +28,7 @@ rules: [] # Rules are automatically filled in by the controller manager.
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: knative-samples-core
+  name: knative-avi-core
   labels:
     avi.knative.dev/release: devel
     avi.knative.dev/controller: "true"
@@ -86,7 +86,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   # A separate cluster role for the things actually needed by this
   # controller's contrived examples.
-  name: knative-samples-resources
+  name: knative-avi-resources
   labels:
     avi.knative.dev/release: devel
     avi.knative.dev/controller: "true"

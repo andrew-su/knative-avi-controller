@@ -15,7 +15,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: knative-samples-namespace-rbac
+  name: knative-avi-namespace-rbac
   namespace: knative-avi-integration
   labels:
     avi.knative.dev/release: devel
@@ -25,5 +25,5 @@ subjects:
     namespace: knative-avi-integration
 roleRef:
   kind: Role
-  name: knative-samples-namespace-rbac
+  name: knative-avi-namespace-rbac
   apiGroup: rbac.authorization.k8s.io
