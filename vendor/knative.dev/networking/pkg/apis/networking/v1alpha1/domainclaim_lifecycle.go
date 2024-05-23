@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Knative Authors
+Copyright 2020 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package v1alpha1
 
-import (
-	// The set of controllers this controller process runs.
-	"knative.dev/avi-controller/pkg/reconciler/kingress"
+import "k8s.io/apimachinery/pkg/runtime/schema"
 
-	// This defines the shared main for injected controllers.
-	"knative.dev/pkg/injection/sharedmain"
-)
-
-func main() {
-	sharedmain.Main("controller",
-		kingress.NewController,
-	)
+// GetGroupVersionKind returns SchemeGroupVersion of a ClusterDomainClaim.
+func (*ClusterDomainClaim) GetGroupVersionKind() schema.GroupVersionKind {
+	return SchemeGroupVersion.WithKind("ClusterDomainClaim")
 }

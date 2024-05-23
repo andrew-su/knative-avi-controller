@@ -14,18 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package v1alpha1
 
-import (
-	// The set of controllers this controller process runs.
-	"knative.dev/avi-controller/pkg/reconciler/kingress"
+import "context"
 
-	// This defines the shared main for injected controllers.
-	"knative.dev/pkg/injection/sharedmain"
-)
+// SetDefaults sets default values on the ServerlessServiceSpec.
+func (ss *ServerlessService) SetDefaults(ctx context.Context) {
+	ss.Spec.SetDefaults(ctx)
+}
 
-func main() {
-	sharedmain.Main("controller",
-		kingress.NewController,
-	)
+// SetDefaults sets default values on the ServerlessServiceSpec.
+func (*ServerlessServiceSpec) SetDefaults(_ context.Context) {
+	// Nothing is defaultable so far.
 }
