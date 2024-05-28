@@ -50,11 +50,19 @@ type Reconciler struct {
 var _ kingressreconciler.Interface = (*Reconciler)(nil)
 
 // FinalizeKind implements Interface.FinalizeKind.
-func (r *Reconciler) FinalizeKind(ctx context.Context, o *netv1alpha1.Ingress) reconciler.Event {
-	if err := r.kubeclient.NetworkingV1().Ingresses("tanzu-system-ingress").Delete(ctx, o.Name, metav1.DeleteOptions{}); err != nil && !apierrs.IsNotFound(err) {
+func (r *Reconciler) FinalizeKind(ctx context.Context, ing *netv1alpha1.Ingress) reconciler.Event {
+	selector, err := labels.Parse(fmt.Sprintf("%s=%s,%s=%s,%s!=%d",
+		resources.ParentNameKey, ing.Name,
+		resources.ParentNamespaceKey, ing.Namespace,
+		resources.GenerationKey, ing.Generation))
+	if err != nil {
 		return err
 	}
-	
+
+	if err := r.kubeclient.NetworkingV1().Ingresses("tanzu-system-ingress").DeleteCollection(ctx, metav1.DeleteOptions{}, metav1.ListOptions{LabelSelector: selector.String()}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
