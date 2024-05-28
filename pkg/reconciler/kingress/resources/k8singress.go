@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	k8snetworkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,8 +51,13 @@ func MakeK8sIngress(ing *netv1alpha1.Ingress) *k8snetworkingv1.Ingress {
 
 	k8sIngress := &k8snetworkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   ing.Name,
-			Labels: kmeta.UnionMaps(ing.Labels, map[string]string{}),
+			Name: ing.Name,
+			Labels: kmeta.UnionMaps(ing.Labels, map[string]string{
+				ParentNameKey:      ing.Name,
+				ParentNamespaceKey: ing.Namespace,
+				GenerationKey:      fmt.Sprintf("%d", ing.Generation),
+				"app":              "gslb",
+			}),
 			Annotations: kmeta.FilterMap(ing.GetAnnotations(), func(key string) bool {
 				return key == corev1.LastAppliedConfigAnnotation
 			}),
