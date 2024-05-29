@@ -16,9 +16,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config-observability
-  namespace: knative-samples
+  namespace: knative-avi-integration
   labels:
-    samples.knative.dev/release: devel
+    avi.knative.dev/release: devel
 
 data:
   _example: |

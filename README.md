@@ -1,6 +1,6 @@
 # Knative Sample Controller
 
-[![GoDoc](https://godoc.org/knative.dev/sample-controller?status.svg)](https://godoc.org/knative.dev/sample-controller)
+[![GoDoc](https://godoc.org/knative.dev/avi-controller?status.svg)](https://godoc.org/knative.dev/avi-controller)
 [![Go Report Card](https://goreportcard.com/badge/knative/sample-controller)](https://goreportcard.com/report/knative/sample-controller)
 
 Knative `sample-controller` defines a few simple resources that are validated by
