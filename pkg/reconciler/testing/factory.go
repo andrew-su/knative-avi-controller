@@ -32,6 +32,7 @@ import (
 	"knative.dev/pkg/reconciler"
 	rtesting "knative.dev/pkg/reconciler/testing"
 
+	fakeakoclient "knative.dev/avi-controller/pkg/client/ako/injection/client/fake"
 	fakenetworkingclient "knative.dev/networking/pkg/client/injection/client/fake"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 )
@@ -57,11 +58,13 @@ func MakeFactory(ctor Ctor) rtesting.Factory {
 
 		ctx, client := fakenetworkingclient.With(ctx, ls.GetNetworkingObjects()...)
 		ctx, kubeclient := fakekubeclient.With(ctx, ls.GetKubeObjects()...)
+		ctx, akoclient := fakeakoclient.With(ctx, ls.GetAviObjects()...)
 
 		// This is needed by the Configuration controller tests, which
 		// use GenerateName to produce Revisions.
 		rtesting.PrependGenerateNameReactor(&client.Fake)
 		rtesting.PrependGenerateNameReactor(&kubeclient.Fake)
+		rtesting.PrependGenerateNameReactor(&akoclient.Fake)
 
 		// Set up our Controller from the fakes.
 		c := ctor(ctx, &ls, configmap.NewStaticWatcher())
@@ -76,6 +79,7 @@ func MakeFactory(ctor Ctor) rtesting.Factory {
 		for _, reactor := range r.WithReactors {
 			client.PrependReactor("*", "*", reactor)
 			kubeclient.PrependReactor("*", "*", reactor)
+			akoclient.PrependReactor("*", "*", reactor)
 		}
 
 		// Validate all Create operations through the serving client.
@@ -88,7 +92,7 @@ func MakeFactory(ctor Ctor) rtesting.Factory {
 			return rtesting.ValidateUpdates(context.Background(), action)
 		})
 
-		actionRecorderList := rtesting.ActionRecorderList{client, kubeclient}
+		actionRecorderList := rtesting.ActionRecorderList{client, kubeclient, akoclient}
 		eventList := rtesting.EventList{Recorder: eventRecorder}
 
 		return c, actionRecorderList, eventList

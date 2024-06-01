@@ -21,6 +21,7 @@ import (
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
 
+	fakeakoclientset "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/clientset/versioned/fake"
 	fakeservingclientset "knative.dev/networking/pkg/client/clientset/versioned/fake"
 
 	networking "knative.dev/networking/pkg/apis/networking/v1alpha1"
@@ -29,12 +30,16 @@ import (
 	k8snetworking "k8s.io/api/networking/v1"
 	k8snetworkinglister "k8s.io/client-go/listers/networking/v1"
 
+	avi "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/apis/ako/v1beta1"
+	avilisters "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/listers/ako/v1beta1"
+
 	"knative.dev/pkg/reconciler/testing"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeservingclientset.AddToScheme,
 	fakekubeclientset.AddToScheme,
+	fakeakoclientset.AddToScheme,
 }
 
 type Listers struct {
@@ -79,6 +84,10 @@ func (l *Listers) GetKubeObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakekubeclientset.AddToScheme)
 }
 
+func (l *Listers) GetAviObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakeakoclientset.AddToScheme)
+}
+
 // GetIngressLister get lister for Ingress resource.
 func (l *Listers) GetIngressLister() k8snetworkinglister.IngressLister {
 	return k8snetworkinglister.NewIngressLister(l.IndexerFor(&k8snetworking.Ingress{}))
@@ -87,4 +96,9 @@ func (l *Listers) GetIngressLister() k8snetworkinglister.IngressLister {
 // GetKIngressLister get lister for Knative Ingress resource.
 func (l *Listers) GetKIngressLister() networkinglisters.IngressLister {
 	return networkinglisters.NewIngressLister(l.IndexerFor(&networking.Ingress{}))
+}
+
+// GetHostRuleLister get lister for Knative Ingress resource.
+func (l *Listers) GetHostRuleLister() avilisters.HostRuleLister {
+	return avilisters.NewHostRuleLister(l.IndexerFor(&avi.HostRule{}))
 }

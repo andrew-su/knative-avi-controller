@@ -28,6 +28,9 @@ import (
 
 	netv1alpha1 "knative.dev/networking/pkg/apis/networking/v1alpha1"
 
+	aviclient "knative.dev/avi-controller/pkg/client/ako/injection/client"
+	hostrulelister "knative.dev/avi-controller/pkg/client/ako/injection/informers/ako/v1beta1/hostrule"
+
 	kingressinformer "knative.dev/networking/pkg/client/injection/informers/networking/v1alpha1/ingress"
 	kingressreconciler "knative.dev/networking/pkg/client/injection/reconciler/networking/v1alpha1/ingress"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
@@ -52,11 +55,15 @@ func NewController(
 	// cluster's state of the respective resource at all times.
 	kingressInformer := kingressinformer.Get(ctx)
 	ingressInformer := ingressinformer.Get(ctx)
+	hostruleInformer := hostrulelister.Get(ctx)
 
 	r := &Reconciler{
 		// The client will be needed to create/delete Pods via the API.
 		kubeclient:       kubeclient.Get(ctx),
 		k8sIngressLister: ingressInformer.Lister(),
+
+		akoclient:      aviclient.Get(ctx),
+		hostRuleLister: hostruleInformer.Lister(),
 	}
 	impl := kingressreconciler.NewImpl(ctx, r, IngressClassName, func(impl *controller.Impl) controller.Options {
 		configsToResync := []interface{}{

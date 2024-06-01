@@ -20,7 +20,7 @@ func MakeK8sIngress(ctx context.Context, ing *netv1alpha1.Ingress) *k8snetworkin
 
 	ingressClass := cfg.Avi.AviIngressClassName
 	envoyServiceName := cfg.Avi.EnvoyService.Name
-	envoyServiceNamespace := cfg.Avi.EnvoyService.Namespace
+	envoyServiceNamespace := cfg.Avi.EnvoyService.Namespace // The resource must live in the same namespace as the service we target.
 
 	hostname := ""
 

@@ -10,10 +10,12 @@ import (
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 
+	fakeakoclient "knative.dev/avi-controller/pkg/client/ako/injection/client/fake"
 	fakeingressclient "knative.dev/networking/pkg/client/injection/client/fake"
 	kingressreconciler "knative.dev/networking/pkg/client/injection/reconciler/networking/v1alpha1/ingress"
 	fakekubeclient "knative.dev/pkg/client/injection/kube/client/fake"
 
+	akov1beta1 "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/apis/ako/v1beta1"
 	k8snetworkingv1 "k8s.io/api/networking/v1"
 	"knative.dev/networking/pkg/apis/networking"
 	"knative.dev/networking/pkg/apis/networking/v1alpha1"
@@ -24,6 +26,8 @@ import (
 
 	"knative.dev/avi-controller/pkg/reconciler/kingress/config"
 	fixtures_test "knative.dev/avi-controller/pkg/reconciler/kingress/fixtures"
+
+	hostrule_test "knative.dev/avi-controller/pkg/reconciler/kingress/fixtures/hostrule"
 	ingress_test "knative.dev/avi-controller/pkg/reconciler/kingress/fixtures/ingress"
 	kingress_test "knative.dev/avi-controller/pkg/reconciler/kingress/fixtures/kingress"
 	"knative.dev/avi-controller/pkg/reconciler/kingress/resources"
@@ -74,6 +78,18 @@ func TestReconciler(t *testing.T) {
 					}),
 					ingress_test.WithRule("fuzzy.my-ns.example.com", fixtures_test.DefaultConfig),
 				),
+				hostrule_test.HostRule("butterfly", fixtures_test.DefaultConfig,
+					hostrule_test.WithBasicSpec("fuzzy.my-ns.example.com"),
+					hostrule_test.WithLabels(map[string]string{
+						resources.ParentNameKey:      "butterfly",
+						resources.ParentNamespaceKey: "meadow",
+						resources.GenerationKey:      "4",
+					}),
+					hostrule_test.WithAnnotations(map[string]string{
+						networking.IngressClassAnnotationKey: IngressClassName,
+					}),
+					hostrule_test.WithDefaultTLS,
+				),
 			},
 			WantPatches: []clientgotesting.PatchActionImpl{{
 				ActionImpl: clientgotesting.ActionImpl{
@@ -113,6 +129,18 @@ func TestReconciler(t *testing.T) {
 						networking.IngressClassAnnotationKey: IngressClassName,
 					}),
 					ingress_test.WithRule("muddy.my-ns.example.com", fixtures_test.DefaultConfig),
+				),
+				hostrule_test.HostRule("butterfly", fixtures_test.DefaultConfig,
+					hostrule_test.WithBasicSpec("muddy.my-ns.example.com"),
+					hostrule_test.WithLabels(map[string]string{
+						resources.ParentNameKey:      "butterfly",
+						resources.ParentNamespaceKey: "meadow",
+						resources.GenerationKey:      "4",
+					}),
+					hostrule_test.WithAnnotations(map[string]string{
+						networking.IngressClassAnnotationKey: IngressClassName,
+					}),
+					hostrule_test.WithDefaultTLS,
 				),
 			},
 			WantPatches: []clientgotesting.PatchActionImpl{{
@@ -173,11 +201,29 @@ func TestReconciler(t *testing.T) {
 					}),
 					ingress_test.WithRule("fuzzy.my-ns.example.com", fixtures_test.DefaultConfig),
 				),
+				hostrule_test.HostRule("butterfly", fixtures_test.DefaultConfig,
+					hostrule_test.WithBasicSpec("fuzzy.my-ns.example.com"),
+					hostrule_test.WithLabels(map[string]string{
+						resources.ParentNameKey:      "butterfly",
+						resources.ParentNamespaceKey: "meadow",
+						resources.GenerationKey:      "4",
+					}),
+					hostrule_test.WithAnnotations(map[string]string{
+						networking.IngressClassAnnotationKey: IngressClassName,
+					}),
+					hostrule_test.WithDefaultTLS,
+				),
 			},
 			WantDeletes: []clientgotesting.DeleteActionImpl{{
 				ActionImpl: clientgotesting.ActionImpl{
 					Namespace: fixtures_test.DefaultConfig.Avi.EnvoyService.Namespace,
 					Resource:  k8snetworkingv1.SchemeGroupVersion.WithResource("ingresses"),
+				},
+				Name: "butterfly",
+			}, {
+				ActionImpl: clientgotesting.ActionImpl{
+					Namespace: fixtures_test.DefaultConfig.Avi.EnvoyService.Namespace,
+					Resource:  akov1beta1.SchemeGroupVersion.WithResource("hostrules"),
 				},
 				Name: "butterfly",
 			}},
@@ -201,7 +247,7 @@ func TestReconciler(t *testing.T) {
 						networking.IngressClassAnnotationKey: IngressClassName,
 					}),
 					kingress_test.WithGeneration(4),
-					kingress_test.WithRules(kingress_test.BasicRule("fuzzy.my-ns.fancy.com", v1alpha1.IngressVisibilityExternalIP)),
+					kingress_test.WithRules(kingress_test.BasicRule("muddy.swamp.rainbow", v1alpha1.IngressVisibilityExternalIP)),
 					kingress_test.WithInitialConditions,
 				),
 				ingress_test.Ingress("butterfly", fixtures_test.DefaultConfig,
@@ -215,20 +261,47 @@ func TestReconciler(t *testing.T) {
 					}),
 					ingress_test.WithRule("fuzzy.my-ns.example.com", fixtures_test.DefaultConfig),
 				),
-			},
-			WantUpdates: []clientgotesting.UpdateActionImpl{{
-				Object: ingress_test.Ingress("butterfly", fixtures_test.DefaultConfig,
-					ingress_test.WithLabels(map[string]string{
+				hostrule_test.HostRule("butterfly", fixtures_test.DefaultConfig,
+					hostrule_test.WithBasicSpec("fuzzy.my-ns.example.com"),
+					hostrule_test.WithLabels(map[string]string{
 						resources.ParentNameKey:      "butterfly",
 						resources.ParentNamespaceKey: "meadow",
 						resources.GenerationKey:      "4",
 					}),
-					ingress_test.WithAnnotations(map[string]string{
+					hostrule_test.WithAnnotations(map[string]string{
 						networking.IngressClassAnnotationKey: IngressClassName,
 					}),
-					ingress_test.WithRule("fuzzy.my-ns.fancy.com", fixtures_test.DefaultConfig),
+					hostrule_test.WithDefaultTLS,
 				),
-			}},
+			},
+			WantUpdates: []clientgotesting.UpdateActionImpl{
+				{
+					Object: ingress_test.Ingress("butterfly", fixtures_test.DefaultConfig,
+						ingress_test.WithLabels(map[string]string{
+							resources.ParentNameKey:      "butterfly",
+							resources.ParentNamespaceKey: "meadow",
+							resources.GenerationKey:      "4",
+						}),
+						ingress_test.WithAnnotations(map[string]string{
+							networking.IngressClassAnnotationKey: IngressClassName,
+						}),
+						ingress_test.WithRule("muddy.swamp.rainbow", fixtures_test.DefaultConfig),
+					),
+				}, {
+					Object: hostrule_test.HostRule("butterfly", fixtures_test.DefaultConfig,
+						hostrule_test.WithBasicSpec("muddy.swamp.rainbow"),
+						hostrule_test.WithLabels(map[string]string{
+							resources.ParentNameKey:      "butterfly",
+							resources.ParentNamespaceKey: "meadow",
+							resources.GenerationKey:      "4",
+						}),
+						hostrule_test.WithAnnotations(map[string]string{
+							networking.IngressClassAnnotationKey: IngressClassName,
+						}),
+						hostrule_test.WithDefaultTLS,
+					),
+				},
+			},
 			WantPatches: []clientgotesting.PatchActionImpl{{
 				ActionImpl: clientgotesting.ActionImpl{
 					Namespace: "meadow",
@@ -246,6 +319,8 @@ func TestReconciler(t *testing.T) {
 		r := &Reconciler{
 			kubeclient:       fakekubeclient.Get(ctx),
 			k8sIngressLister: listers.GetIngressLister(),
+			akoclient:        fakeakoclient.Get(ctx),
+			hostRuleLister:   listers.GetHostRuleLister(),
 		}
 
 		ingr := kingressreconciler.NewReconciler(ctx, logging.FromContext(ctx), fakeingressclient.Get(ctx),

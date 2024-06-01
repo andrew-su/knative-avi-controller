@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/google/go-cmp v0.6.0
+	github.com/vmware/load-balancer-and-ingress-services-for-kubernetes v0.1.0
 	k8s.io/api v0.30.0
 	k8s.io/apimachinery v0.30.0
 	k8s.io/client-go v0.30.0

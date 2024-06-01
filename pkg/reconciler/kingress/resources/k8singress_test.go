@@ -26,7 +26,7 @@ func TestMakeK8sIngress_Labels(t *testing.T) {
 		expected *v1.Ingress
 	}{
 		{
-			name: "no new labels",
+			name: "default labels",
 			input: kingress_test.Ingress("river", "water",
 				kingress_test.WithGeneration(5),
 				kingress_test.WithRules(kingress_test.BasicRule("foo.bar.example.com", netv1alpha1.IngressVisibilityExternalIP)),

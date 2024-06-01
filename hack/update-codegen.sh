@@ -25,15 +25,13 @@ boilerplate="${REPO_ROOT_DIR}/hack/boilerplate/boilerplate.go.txt"
 echo "=== Update Codegen for $MODULE_NAME"
 
 group "Avi Kubernetes Operator Codegen"
-# OUTPUT_PKG="knative.dev/avi-controller/pkg/client/ako/injection" \
-# VERSIONED_CLIENTSET_PKG="github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/clientset/versioned" \
-# EXTERNAL_INFORMER_PKG="github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/informers/externalversions" \
-# LISTERS_PKG="github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/listers/ako/v1beta1" \
-# "${KNATIVE_CODEGEN_PKG}"/hack/generate-knative.sh "injection" \
-#   github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1 \
-#   github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg \
-#   "apis:ako/v1beta1" \
-#   --go-header-file "${boilerplate}"
+OUTPUT_PKG="knative.dev/avi-controller/pkg/client/ako/injection" \
+LISTERS_PKG="github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/listers/ako/v1beta1" \
+"${KNATIVE_CODEGEN_PKG}"/hack/generate-knative.sh "injection" \
+  github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1 \
+  github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg \
+  "apis:ako/v1beta1" \
+  --go-header-file "${boilerplate}"
 
 # Deepcopy is broken for fields that use generics - so we generate the code
 # ignore failures and then clean it up ourselves with sed until k8s upstream

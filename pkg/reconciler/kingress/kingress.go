@@ -27,6 +27,9 @@ import (
 
 	k8snetworkingv1lister "k8s.io/client-go/listers/networking/v1"
 
+	aviclient "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/clientset/versioned"
+	avilister "github.com/vmware/load-balancer-and-ingress-services-for-kubernetes/pkg/client/v1beta1/listers/ako/v1beta1"
+
 	"knative.dev/avi-controller/pkg/reconciler/kingress/config"
 	"knative.dev/avi-controller/pkg/reconciler/kingress/resources"
 	"knative.dev/pkg/reconciler"
@@ -37,8 +40,10 @@ import (
 
 type Reconciler struct {
 	kubeclient kubernetes.Interface
+	akoclient  aviclient.Interface
 
 	k8sIngressLister k8snetworkingv1lister.IngressLister
+	hostRuleLister   avilister.HostRuleLister
 }
 
 // Check that our Reconciler implements Interface
@@ -46,17 +51,15 @@ var _ kingressreconciler.Interface = (*Reconciler)(nil)
 
 // FinalizeKind implements Interface.FinalizeKind.
 func (r *Reconciler) FinalizeKind(ctx context.Context, ing *netv1alpha1.Ingress) reconciler.Event {
-	// selector, err := labels.Parse(fmt.Sprintf("%s=%s,%s=%s,%s!=%d",
-	// 	resources.ParentNameKey, ing.Name,
-	// 	resources.ParentNamespaceKey, ing.Namespace,
-	// 	resources.GenerationKey, ing.Generation))
-	// if err != nil {
-	// 	return err
-	// }
+	cfg := config.FromContext(ctx)
 
-	// if err := r.kubeclient.NetworkingV1().Ingresses("tanzu-system-ingress").DeleteCollection(ctx, metav1.DeleteOptions{}, metav1.ListOptions{LabelSelector: selector.String()}); err != nil {
-	// 	return err
-	// }
+	if err := r.kubeclient.NetworkingV1().Ingresses(cfg.Avi.EnvoyService.Namespace).Delete(ctx, ing.Name, metav1.DeleteOptions{}); err != nil {
+		return err
+	}
+
+	if err := r.akoclient.AkoV1beta1().HostRules(cfg.Avi.EnvoyService.Namespace).Delete(ctx, ing.Name, metav1.DeleteOptions{}); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -65,6 +68,59 @@ func (r *Reconciler) FinalizeKind(ctx context.Context, ing *netv1alpha1.Ingress)
 func (r *Reconciler) ReconcileKind(ctx context.Context, o *netv1alpha1.Ingress) reconciler.Event {
 	if err := r.reconcileIngress(ctx, o); err != nil {
 		return err
+	}
+
+	if err := r.reconcileHostRule(ctx, o); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Reconciler) reconcileHostRule(ctx context.Context, ing *netv1alpha1.Ingress) error {
+	cfg := config.FromContext(ctx)
+
+	desired := resources.MakeHostRule(ctx, ing)
+
+	if desired == nil {
+		if _, err := r.akoclient.AkoV1beta1().HostRules(cfg.Avi.EnvoyService.Namespace).Get(ctx, ing.Name, metav1.GetOptions{}); apierrs.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("failed to get hostrule: %w", err)
+		}
+
+		if err := r.akoclient.AkoV1beta1().HostRules(cfg.Avi.EnvoyService.Namespace).Delete(ctx, ing.Name, metav1.DeleteOptions{}); err != nil {
+			return fmt.Errorf("failed to delete hostrule: %w", err)
+		}
+		return nil
+	}
+
+	existing, err := r.akoclient.AkoV1beta1().HostRules(cfg.Avi.EnvoyService.Namespace).Get(ctx, ing.Name, metav1.GetOptions{})
+	if apierrs.IsNotFound(err) {
+		_, err := r.akoclient.AkoV1beta1().HostRules(cfg.Avi.EnvoyService.Namespace).Create(ctx, desired, metav1.CreateOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to create ingress: %w", err)
+		}
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	original := existing.DeepCopy()
+	if !equality.Semantic.DeepEqual(original.Spec, desired.Spec) ||
+		!equality.Semantic.DeepEqual(original.Annotations, desired.Annotations) ||
+		!equality.Semantic.DeepEqual(original.Labels, desired.Labels) {
+
+		// Don't modify the informers copy.
+		original.Spec = desired.Spec
+		original.Annotations = desired.Annotations
+		original.Labels = desired.Labels
+		_, err := r.akoclient.AkoV1beta1().HostRules(original.Namespace).Update(ctx, original, metav1.UpdateOptions{})
+
+		if err != nil {
+			// recorder.Eventf(ing, corev1.EventTypeWarning, "UpdateFailed", "Failed to update K8s Ingress: %v", err)
+			return fmt.Errorf("failed to update hostrule: %w", err)
+		}
 	}
 
 	return nil
@@ -113,7 +169,7 @@ func (r *Reconciler) reconcileIngress(ctx context.Context, ing *netv1alpha1.Ingr
 
 		if err != nil {
 			// recorder.Eventf(ing, corev1.EventTypeWarning, "UpdateFailed", "Failed to update K8s Ingress: %v", err)
-			return fmt.Errorf("failed to update K8s Ingress: %w", err)
+			return fmt.Errorf("failed to update ingress: %w", err)
 		}
 	}
 
