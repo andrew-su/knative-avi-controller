@@ -1,14 +1,15 @@
-# Knative Sample Controller
+# Knative Avi Controller
 
-[![GoDoc](https://godoc.org/knative.dev/avi-controller?status.svg)](https://godoc.org/knative.dev/avi-controller)
-[![Go Report Card](https://goreportcard.com/badge/knative/sample-controller)](https://goreportcard.com/report/knative/sample-controller)
+Knative `avi-controller` reconciles knative's `Ingress` resource to generate the
+appropriate kubernetes' `Ingress` and Avi's `HostRule` resources.
 
-Knative `sample-controller` defines a few simple resources that are validated by
-webhook and managed by a controller to demonstrate the canonical style in which
-Knative writes controllers.
+Usage requirements:
+* Knative deployed with an Ingress which runs on the same cluster.
+* Service pointing to the ingress should be running in ClusterIP mode.
+* Avi's AKO and AMKO is installed and configured correctly.
 
-To learn more about Knative, please visit our
-[Knative docs](https://github.com/knative/docs) repository.
+TODO:
+* Add configuration for GSLB configuration.
 
 If you are interested in contributing, see [CONTRIBUTING.md](./CONTRIBUTING.md)
 and [DEVELOPMENT.md](./DEVELOPMENT.md).
